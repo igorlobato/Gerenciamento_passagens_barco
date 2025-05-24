@@ -10,25 +10,55 @@
 ## Sistema de Gerenciamento de Passagem de Barcos
 
 # Equipe:
-## Clevesson Robert Xavier de Oliveira
-## Ronilson Gomes Do Amaral Neto
-## Igor Lobato de Oliveira
+- Clevesson Robert Xavier de Oliveira
+- Ronilson Gomes Do Amaral Neto
+- Igor Lobato de Oliveira
 
 ## O trabalho tem como objetivo implementar 2 funções de segurança a fim de praticar métodos de segurança da informação, este trabalho irá usar na API métodos de segurança para autenticação e login, sendi divididos em:
 - Registro com ativação de conta por e-mail
 - Login com token
 - Vai pondo aqui...
 
-## Para usar a API basta usar os seguintes comandos
+## Funcionalidades de Segurança
+- Registro com Validação: Criação de contas com validação de e-mail, CPF, número de telefone e senha (mínimo 8 caracteres). Ativação de conta por e-mail (em desenvolvimento).
+- Login com Token JWT: Autenticação com e-mail e senha, retornando um token JWT para acesso protegido.
+- Logout Seguro: Invalidação do token JWT ao deslogar.
+- Validação de Entrada: Proteção contra injeções e dados inválidos usando regras do Laravel.
+- Proteção de Rotas: Endpoints protegidos com middleware de autenticação.
 
-git clone https://github.com/igorlobato/Gerenciamento_passagens_barco.git
+## Pré-requisitos
+- Para rodar a API localmente, você precisa de:
+- PHP 8.1+
+- Composer
+- PostgreSQL 13+
+- Opcional: Docker com Laravel Sail
+- Git
+- O front-end do projeto configurado em http://localhost:8001 ou porta disponível.
 
-## Após isso deve-se executar um banco de dados Postgres no computador. O projeto tem configurado o .env para o docker-compose, então se for executá-lo de forma diferente precisa configurar o arquivo com as configurações do seu banco.
+# Para usar a API basta executar os seguintes passos: 
 
-## Com o banco rodando, executa-se as migrations para criar as tabelas do banco de dados com:
+## Clonar o repositório
+- git clone https://github.com/igorlobato/Gerenciamento_passagens_barco.git 
+- cd Gerenciamento_passagens_barco
 
-php artisan migrate
+## Instalar Dependências
+- composer install
 
-## Se estiver usando o Docker do Sail
+## Configurar o Banco de Dados
+- Instale o PostgreSQL e execute.
+- Crie um banco de dados chamado passagens_barco.
 
-./vendor/bin/sail artisan migrate
+## Configure o arquivo .env:
+- Copie o arquivo .env.example para .env: cp .env.example .env
+- Edite o .env com as configurações do seu banco.
+
+## (Opcional) Usar Docker com Laravel Sail:
+- Instale o Laravel Sail: composer require laravel/sail --dev
+- Inicie os contêineres: ./vendor/bin/sail up -d
+
+## Executar as Migrations
+- php artisan migrate
+- ./vendor/bin/sail artisan migrate
+
+##  Iniciar o Servidor (Se não estiver usando docker)
+- php artisan serve
