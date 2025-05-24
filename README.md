@@ -18,3 +18,17 @@
 - Registro com ativação de conta por e-mail
 - Login com token
 - Vai pondo aqui...
+
+## Para usar a API basta usar os seguintes comandos
+
+git clone https://github.com/igorlobato/Gerenciamento_passagens_barco.git
+
+## Após isso deve-se executar um banco de dados Postgres no computador. O projeto tem configurado o .env para o docker-compose, então se for executá-lo de forma diferente precisa configurar o arquivo com as configurações do seu banco.
+
+## Com o banco rodando, executa-se as migrations para criar as tabelas do banco de dados com:
+
+php artisan migrate
+
+## Se estiver usando o Docker do Sail
+
+./vendor/bin/sail artisan migrate
