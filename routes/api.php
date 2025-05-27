@@ -19,10 +19,9 @@ use App\Http\Controllers\API\UserController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-//Sanctum gerencia tokens, pesquisar mais sobre para entender como funciona
-Route::middleware('auth:sanctum')->group(function () {
+//Sanctum verifica se a requisição tem um token válido no header
+Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::post('/users', [UserController::class, 'store']);

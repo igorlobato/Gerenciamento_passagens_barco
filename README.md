@@ -28,9 +28,9 @@
 
 ## Pré-requisitos
 - Para rodar a API localmente, você precisa de:
-- PHP 8.1+
+- PHP
 - Composer
-- PostgreSQL 13+
+- PostgreSQL
 - Opcional: Docker com Laravel Sail
 - Git
 - O front-end do projeto configurado em http://localhost:8001 ou porta disponível.
