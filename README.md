@@ -14,13 +14,13 @@
 - Ronilson Gomes Do Amaral Neto
 - Igor Lobato de Oliveira
 
-## O trabalho tem como objetivo implementar 2 funções de segurança a fim de praticar métodos de segurança da informação, este trabalho irá usar na API métodos de segurança para autenticação e login, sendi divididos em:
+## O trabalho tem como objetivo implementar 2 funções de segurança a fim de praticar métodos de segurança da informação, este trabalho irá usar na API métodos de segurança para autenticação e login, sendo divididos em:
 - Registro com ativação de conta por e-mail
 - Login com token
-- Vai pondo aqui...
+- Loading...
 
 ## Funcionalidades de Segurança
-- Registro com Validação: Criação de contas com validação de e-mail, CPF, número de telefone e senha (mínimo 8 caracteres). Ativação de conta por e-mail (em desenvolvimento).
+- Registro com Validação: Criação de contas com validação de e-mail e senha (mínimo 8 caracteres). Ativação de conta por e-mail.
 - Login com Token JWT: Autenticação com e-mail e senha, retornando um token JWT para acesso protegido.
 - Logout Seguro: Invalidação do token JWT ao deslogar.
 - Validação de Entrada: Proteção contra injeções e dados inválidos usando regras do Laravel.

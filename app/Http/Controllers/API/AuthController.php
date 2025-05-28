@@ -79,7 +79,7 @@ class AuthController extends Controller
             ]);
         }
 
-        $user = JWTAuth::user();
+        $user = JWTAuth::user(); //Pega o user onde tem o id do token
         Log::channel('activity')->info('Atividade registrada', [
             'user_id' => $user->id,
             'action' => 'login',
