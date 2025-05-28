@@ -43,7 +43,20 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        return User::findOrFail($id);
+        $user = JWTAuth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuário não autenticado.'], 401);
+        }
+
+        return response()->json([
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'cpf' => $user->cpf,
+            'numero' => $user->numero,
+            'ativo' => (bool) $user->ativo,
+        ], 200);
     }
 
     /**

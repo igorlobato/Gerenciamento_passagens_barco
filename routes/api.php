@@ -18,8 +18,9 @@ use App\Http\Controllers\API\UserController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/activate', [AuthController::class, 'activate']);
+Route::post('/resend-activation', [AuthController::class, 'resendActivation']);
 
-//Sanctum verifica se a requisição tem um token válido no header
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/users', [UserController::class, 'index']);
