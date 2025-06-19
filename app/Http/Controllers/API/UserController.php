@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
@@ -43,20 +44,29 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = JWTAuth::user();
+        try {
+            $user = User::find($id);
+            if (!$user) {
+                return response()->json(['error' => 'Usuário não encontrado.'], 404);
+            }
 
-        if (!$user) {
-            return response()->json(['error' => 'Usuário não autenticado.'], 401);
+            $authUser = JWTAuth::user();
+            if (!$authUser || $authUser->id != $id) {
+                return response()->json(['error' => 'Acesso não autorizado.'], 403);
+            }
+
+            return response()->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'cpf' => $user->cpf,
+                'numero' => $user->numero,
+                'ativo' => (bool) $user->ativo,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar usuário: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao buscar usuário.'], 500);
         }
-
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'cpf' => $user->cpf,
-            'numero' => $user->numero,
-            'ativo' => (bool) $user->ativo,
-        ], 200);
     }
 
     /**

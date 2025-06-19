@@ -20,6 +20,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/activate', [AuthController::class, 'activate']);
 Route::post('/resend-activation', [AuthController::class, 'resendActivation']);
+Route::post('/resend-password', [AuthController::class, 'resendPassword']);
 
 //Rotas protregidas por token JWT em auth.php
 Route::middleware('auth:api')->group(function () {

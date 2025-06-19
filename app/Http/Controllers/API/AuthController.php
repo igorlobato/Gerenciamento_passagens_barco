@@ -163,7 +163,7 @@ class AuthController extends Controller
         ActivationToken::create([
             'user_id' => $user->id,
             'token' => hash('sha256', $token),
-            'expires_at' => Carbon::now()->addHours(24),
+            'expires_at' => Carbon::now()->addMinutes(30),
         ]);
 
         // Enviar e-mail
@@ -178,5 +178,42 @@ class AuthController extends Controller
         ]);
 
         return response()->json(['message' => 'Novo link de ativação enviado para seu e-mail.'], 200);
+    }
+
+    public function resendPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'E-mail não encontrado.'], 404);
+        }
+
+        // Remover tokens antigos
+        ActivationToken::where('user_id', $user->id)->delete();
+
+        // Gerar novo token
+        $token = Str::random(60);
+        ActivationToken::create([
+            'user_id' => $user->id,
+            'token' => hash('sha256', $token),
+            'expires_at' => Carbon::now()->addMinutes(30),
+        ]);
+
+        // Enviar e-mail
+        $user->notify(new ActivateAccountNotification($token));
+
+        Log::channel('activity')->info('Atividade registrada', [
+            'user_id' => $user->id,
+            'action' => 'resend_activation',
+            'details' => 'Tentativa de redefinição de senha do usuário: ' . $user->name,
+            'ip_address' => $request->ip(),
+            'timestamp' => now()->toDateTimeString(),
+        ]);
+
+        return response()->json(['message' => 'Novo link de redefinição de senha enviado para seu e-mail.'], 200);
     }
 }
