@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\ActivationToken;
 use App\Notifications\ActivateAccountNotification;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class AuthController extends Controller
@@ -183,7 +185,7 @@ class AuthController extends Controller
     public function resendPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
+            'email' => 'required|string|email|exists:users,email',
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -192,28 +194,65 @@ class AuthController extends Controller
             return response()->json(['error' => 'E-mail não encontrado.'], 404);
         }
 
-        // Remover tokens antigos
-        ActivationToken::where('user_id', $user->id)->delete();
-
-        // Gerar novo token
         $token = Str::random(60);
-        ActivationToken::create([
-            'user_id' => $user->id,
-            'token' => hash('sha256', $token),
-            'expires_at' => Carbon::now()->addMinutes(30),
-        ]);
+
+        // Salvar token na tabela password_resets
+        DB::table('password_resets')->updateOrInsert(
+            ['email' => $user->email],
+            [
+                'email' => $user->email,
+                'token' => hash('sha256', $token),
+                'created_at' => now(),
+                'expires_at' => Carbon::now()->addMinutes(30),
+            ]
+        );
 
         // Enviar e-mail
-        $user->notify(new ActivateAccountNotification($token));
+        $user->notify(new ResetPasswordNotification($token));
 
         Log::channel('activity')->info('Atividade registrada', [
             'user_id' => $user->id,
             'action' => 'resend_activation',
-            'details' => 'Tentativa de redefinição de senha do usuário: ' . $user->name,
+            'details' => 'Link de redefinição de senha enviado para: ' . $user->email,
             'ip_address' => $request->ip(),
             'timestamp' => now()->toDateTimeString(),
         ]);
 
         return response()->json(['message' => 'Novo link de redefinição de senha enviado para seu e-mail.'], 200);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|string|email|exists:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $reset = DB::table('password_resets')
+            ->where('email', $request->email)
+            ->where('token', hash('sha256', $request->token))
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$reset) {
+            return response()->json(['error' => 'Token inválido ou expirado.'], 400); //Bad Request
+        }
+
+        $user = User::where('email', $request->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_resets')->where('email', $request->email)->delete();
+
+        Log::channel('activity')->info('Atividade registrada', [
+            'user_id' => $user->id,
+            'action' => 'password_reset',
+            'details' => 'Senha redefinida para o usuário: ' . $user->email,
+            'ip_address' => $request->ip(),
+            'timestamp' => now()->toDateTimeString(),
+        ]);
+
+        return response()->json(['message' => 'Senha redefinida com sucesso.'], 200);
     }
 }
