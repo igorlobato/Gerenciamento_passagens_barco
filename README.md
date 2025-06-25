@@ -9,7 +9,7 @@
 
 ## Sistema de Gerenciamento de Passagem de Barcos
 
-# Dev
+## Dev:
 - Igor Lobato de Oliveira
 
 ## O trabalho tem como objetivo treinar a aplicação dos 5 princípios de segurança da informação: Autenticidade; Confidenciabilidade; Não repúdio; Disponibilidade, Integridade. Devido a limitações do sistema funcionar em ambiente local, não será possível testar a disponíbilidade.
@@ -21,6 +21,12 @@
 - Validação de Entrada: Proteção contra injeções e dados inválidos usando regras do Laravel.
 - Proteção de Rotas: Endpoints protegidos com middleware de autenticação verificando o token.
 - Registro de atividade: A atividade dos usuários são registradas em um log exclusivo.
+
+## A implementação das funcionalidades pode ser encontrada nos seguintes arquivos:
+- App/Http/Controllers/Api/AuthController.php | Funcionalidades relacionadas a autenticação do usuário (token, login, logout, envio de e-mail, redefinição de senha, token de e-mail com tempo limitado)
+- App/Http/Notifications/ActivateAccountNotification.php e ResetPasswordNotification | Criação dos e-mails e seus links 
+- Routes/api.php | Definicação das rotas da API e proteção por token
+- App/Middlewate/LogAcitivity | Criação do middlewate de log de atividades do sistema.
 
 ## Pré-requisitos
 - Para rodar a API localmente, você precisa de:
