@@ -9,31 +9,26 @@
 
 ## Sistema de Gerenciamento de Passagem de Barcos
 
-# Equipe:
-- Clevesson Robert Xavier de Oliveira
-- Ronilson Gomes Do Amaral Neto
+# Dev
 - Igor Lobato de Oliveira
 
-## O trabalho tem como objetivo implementar 2 funções de segurança a fim de praticar métodos de segurança da informação, este trabalho irá usar na API métodos de segurança para autenticação e login, sendo divididos em:
-- Registro com ativação de conta por e-mail
-- Login com token
-- Loading...
+## O trabalho tem como objetivo treinar a aplicação dos 5 princípios de segurança da informação: Autenticidade; Confidenciabilidade; Não repúdio; Disponibilidade, Integridade. Devido a limitações do sistema funcionar em ambiente local, não será possível testar a disponíbilidade.
 
 ## Funcionalidades de Segurança
 - Registro com Validação: Criação de contas com validação de e-mail e senha (mínimo 8 caracteres). Ativação de conta por e-mail.
 - Login com Token JWT: Autenticação com e-mail e senha, retornando um token JWT para acesso protegido.
 - Logout Seguro: Invalidação do token JWT ao deslogar.
 - Validação de Entrada: Proteção contra injeções e dados inválidos usando regras do Laravel.
-- Proteção de Rotas: Endpoints protegidos com middleware de autenticação.
+- Proteção de Rotas: Endpoints protegidos com middleware de autenticação verificando o token.
+- Registro de atividade: A atividade dos usuários são registradas em um log exclusivo.
 
 ## Pré-requisitos
 - Para rodar a API localmente, você precisa de:
 - PHP
 - Composer
 - PostgreSQL
-- Opcional: Docker com Laravel Sail
+- Docker com Laravel Sail
 - Git
-- O front-end do projeto configurado em http://localhost:8001 ou porta disponível.
 
 # Para usar a API basta executar os seguintes passos: 
 
@@ -44,21 +39,14 @@
 ## Instalar Dependências
 - composer install
 
-## Configurar o Banco de Dados
-- Instale o PostgreSQL e execute.
-- Crie um banco de dados chamado passagens_barco.
+## Usar Docker com Laravel Sail:
+- Instale o Laravel Sail: composer require laravel/sail --dev
+- Inicie os contêineres: ./vendor/bin/sail up -d
 
 ## Configure o arquivo .env:
 - Copie o arquivo .env.example para .env: cp .env.example .env
 - Edite o .env com as configurações do seu banco.
 
-## (Opcional) Usar Docker com Laravel Sail:
-- Instale o Laravel Sail: composer require laravel/sail --dev
-- Inicie os contêineres: ./vendor/bin/sail up -d
-
 ## Executar as Migrations
 - php artisan migrate
 - ./vendor/bin/sail artisan migrate
-
-##  Iniciar o Servidor (Se não estiver usando docker)
-- php artisan serve

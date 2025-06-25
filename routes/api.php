@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,4 +32,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/users', [UserController::class, 'store']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    
+    Route::post('/roles/assign-permission', [RoleController::class, 'assignPermission']);
+    Route::post('/roles/revoke-permission', [RoleController::class, 'revokePermission']);
+    Route::post('/roles/assign-role', [RoleController::class, 'assignRole']);
+    Route::post('/roles/revoke-role', [RoleController::class, 'revokeRole']);
+    Route::get('/roles/{role}/permissions', [RoleController::class, 'show']);
 });
