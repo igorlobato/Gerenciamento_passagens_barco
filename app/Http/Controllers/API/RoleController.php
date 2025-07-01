@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
@@ -12,6 +13,7 @@ class RoleController extends Controller
      */
     public function index()
     {
+        return Role::all();
     }
 
     protected function verificarPermissaoRoles(): void
@@ -46,14 +48,24 @@ class RoleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Role $role)
+    public function show(string $id)
     {
-        $permissions = $role->permissions;
+        try{
+            $role = Role::find($id);
+            if(!$role) {
+                return response()->json(['error' => 'Perfil não encontrado', 404]);
+            }
 
-        return inertia('Role/Permissions', [
-            'role' => $role,
-            'permissions' => $permissions,
-        ]);
+            $authUser = JWTAuth::user();
+            if (!$authUser || $authUser->id != $id) {
+                return response()->json(['error' => 'Acesso não autorizado.'], 403);
+            }
+
+            return response()->json([$role], 200);
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar perfil: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao buscar perfil.'], 500);
+        }
     }
 
     /**

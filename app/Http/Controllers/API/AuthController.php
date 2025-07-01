@@ -45,6 +45,8 @@ class AuthController extends Controller
             'expires_at' => Carbon::now()->addMinutes(30),
         ]);
 
+        $user->assignRole('user');
+
         // Enviar e-mail
         try {
             $user->notify(new ActivateAccountNotification($activationToken));
