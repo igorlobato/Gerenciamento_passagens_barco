@@ -13,7 +13,14 @@ class PermissionController extends Controller
      */
     public function index()
     {
-        //
+        return Permission::all();
+    }
+
+    protected function verificarPermissao(): void
+    {
+        if (!Auth::user()->hasPermissionTo('papel_permissao')) {
+            abort(403, 'Acesso não autorizado.');
+        }
     }
 
     /**
@@ -29,7 +36,11 @@ class PermissionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|unique:permissions,name',
+        ]);
+
+        Permission::create(['name' => $request->name]);
     }
 
     /**
@@ -37,7 +48,22 @@ class PermissionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try{
+            $permission = Permission::find($id);
+            if(!$permission) {
+                return response()->json(['error' => 'Permissão não encontrada', 404]);
+            }
+
+            $authUser = JWTAuth::user();
+            if (!$authUser || $authUser->id != $id) {
+                return response()->json(['error' => 'Acesso não autorizado.'], 403);
+            }
+
+            return response()->json([$permission], 200);
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar Permissão: ' . $e->getMessage());
+            return response()->json(['error' => 'Erro ao buscar Permissão.'], 500);
+        }
     }
 
     /**
@@ -59,8 +85,8 @@ class PermissionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Permission $permission): RedirectResponse
     {
-        //
+        $permission->delete();
     }
 }

@@ -59,6 +59,8 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'roles' => $user->getRoleNames()->toArray(),
+                'permissions' => $user->getAllPermissions()->pluck('name')->toArray(),
                 'cpf' => $user->cpf,
                 'numero' => $user->numero,
                 'ativo' => (bool) $user->ativo,

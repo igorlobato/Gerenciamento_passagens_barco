@@ -5,6 +5,9 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Spatie\Permission\Models\Permission;
+use App\Models\User;
 
 class RoleController extends Controller
 {
@@ -13,6 +16,13 @@ class RoleController extends Controller
      */
     public function index()
     {
+        // $passou = $this->verificarPermissaoRoles();
+        // if(!$passou){
+        //     return 0;
+        // } else{
+        //     return Role::all();
+        // }
+
         return Role::all();
     }
 
@@ -41,31 +51,16 @@ class RoleController extends Controller
         ]);
 
         Role::create(['name' => $request->name]);
-
-        return redirect()->route('roles.index');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        try{
-            $role = Role::find($id);
-            if(!$role) {
-                return response()->json(['error' => 'Perfil não encontrado', 404]);
-            }
-
-            $authUser = JWTAuth::user();
-            if (!$authUser || $authUser->id != $id) {
-                return response()->json(['error' => 'Acesso não autorizado.'], 403);
-            }
-
-            return response()->json([$role], 200);
-        } catch (\Exception $e) {
-            Log::error('Erro ao buscar perfil: ' . $e->getMessage());
-            return response()->json(['error' => 'Erro ao buscar perfil.'], 500);
-        }
+        $role = Role::findOrFail($id);
+        $permissions = $role->permissions;
+        return response()->json(['role' => $role, 'permissions' => $permissions]);
     }
 
     /**

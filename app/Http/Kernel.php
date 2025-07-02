@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
 
     protected $routeMiddleware = [
         'log.activity' => \App\Http\Middleware\LogActivity::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
     ];
 }
