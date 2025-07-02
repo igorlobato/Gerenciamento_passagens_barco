@@ -6,6 +6,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\PermissionController;
+use App\Http\Controllers\API\LogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,7 +27,7 @@ Route::post('/reset-password', [AuthController::class, 'resendPassword']);
 Route::post('/reset-password/confirm', [AuthController::class, 'resetPassword']);
 
 //Rotas protregidas por token JWT em auth.php
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth:api', 'log.activity')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
@@ -47,5 +48,8 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/roles/revoke-permission', [RoleController::class, 'revokePermission']);
         Route::post('/roles/assign-role', [RoleController::class, 'assignRole']);
         Route::post('/roles/revoke-role', [RoleController::class, 'revokeRole']);
+
+        Route::get('/logs', [LogController::class, 'index']);
+        Route::get('/logs/{id}', [LogController::class, 'show']);
     });
 });

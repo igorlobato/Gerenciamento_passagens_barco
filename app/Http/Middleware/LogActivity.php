@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Models\Log as LogModel;
 
 class LogActivity
 {
@@ -15,7 +16,7 @@ class LogActivity
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
 
@@ -23,12 +24,11 @@ class LogActivity
             try {
                 $user = JWTAuth::user();
                 if ($user) {
-                    Log::channel('activity')->info('Atividade registrada', [
-                        'user_id' => $user->id,
-                        'action' => $request->method() . ' ' . $request->path(),
-                        'details' => $request->all(),
-                        'ip_address' => $request->ip(),
-                        'timestamp' => now()->toDateTimeString(),
+                    LogModel::create([
+                        'id_user' => $user->id,
+                        'rota' => $request->method() . ' ' . $request->path(),
+                        'detalhe' => json_encode($request->all(), JSON_UNESCAPED_UNICODE),
+                        'ip' => $request->ip(),
                     ]);
                 }
             } catch (\Exception $e) {

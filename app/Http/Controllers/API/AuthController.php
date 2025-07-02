@@ -15,6 +15,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Log as LogModel;
 
 class AuthController extends Controller
 {
@@ -24,7 +25,13 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).+$/'
+            ],
             'cpf' => 'required|string|size:14|unique:users',
             'numero' => 'required|string|size:15|unique:users',
         ]);
@@ -84,13 +91,12 @@ class AuthController extends Controller
         }
 
         $user = JWTAuth::user(); //Pega o user onde tem o id do token
-        Log::channel('activity')->info('Atividade registrada', [
-            'user_id' => $user->id,
-            'action' => 'login',
-            'details' => 'Usuário logado: ' . $user->email,
-            'ip_address' => $request->ip(),
-            'timestamp' => now()->toDateTimeString(),
-        ]);
+        // LogModel::create([
+        //     'id_user' => $user->id,
+        //     'rota' => 'login',
+        //     'detalhe' => 'Usuário logado: ' . $user->email,
+        //     'ip' => $request->ip(),
+        // ]);
 
         return response()->json(['token' => $token], 200);// Ok
     }
