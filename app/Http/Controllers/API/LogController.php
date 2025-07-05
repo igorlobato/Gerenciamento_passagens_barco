@@ -13,7 +13,13 @@ class LogController extends Controller
      */
     public function index()
     {
-        return Log::all();
+        try{
+            $logs = Log::orderBy('created_at', 'desc')
+                ->paginate(20);
+            return response()->json($logs);
+        }catch (\Exception $e){
+            return response()->json(['error' => 'Erro ao obter logs: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

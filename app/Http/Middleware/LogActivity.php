@@ -20,6 +20,10 @@ class LogActivity
     {
         $response = $next($request);
 
+        if ($request->isMethod('get') && $request->is('api/logs*')) {
+            return $response;
+        }
+
         if (JWTAuth::getToken()) {
             try {
                 $user = JWTAuth::user();

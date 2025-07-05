@@ -16,6 +16,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Log as LogModel;
+use Illuminate\Support\Facades\RateLimiter;
+use ReCaptcha\ReCaptcha;
 
 class AuthController extends Controller
 {
@@ -77,34 +79,139 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // Validar apenas email e password inicialmente
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $ip = $request->ip();
+        $key = 'login-attempts:' . $ip;
 
-        if (!$token = JWTAuth::attempt($credentials)) {
-            throw ValidationException::withMessages([
-                'email' => ['As credenciais estão incorretas.'],
+        // Debug: Logar número de tentativas
+        Log::info('Tentativa de login', [
+            'ip' => $ip,
+            'email' => $request->email,
+            'attempts' => RateLimiter::attempts($key),
+            'too_many_attempts' => RateLimiter::tooManyAttempts($key, 5),
+        ]);
+
+        // Verificar se excedeu limite de tentativas
+        if ($this->isRateLimited($request)) {
+            // Exigir e validar reCAPTCHA
+            $request->validate([
+                'g-recaptcha-response' => [
+                    'required',
+                    function ($attribute, $value, $fail) use ($request) {
+                        $recaptcha = new ReCaptcha(env('RECAPTCHA_SECRET_KEY'));
+                        $response = $recaptcha->verify($value, $request->ip());
+                        if (!$response->isSuccess()) {
+                            $fail('Falha na verificação do CAPTCHA.');
+                        }
+                    },
+                ],
             ]);
         }
 
-        $user = JWTAuth::user(); //Pega o user onde tem o id do token
-        // LogModel::create([
-        //     'id_user' => $user->id,
-        //     'rota' => 'login',
-        //     'detalhe' => 'Usuário logado: ' . $user->email,
-        //     'ip' => $request->ip(),
-        // ]);
+        $credentials = $request->only('email', 'password');
 
-        return response()->json(['token' => $token], 200);// Ok
+        if (!$token = JWTAuth::attempt($credentials)) {
+            // Incrementar tentativas
+            RateLimiter::hit($key, 900); // 15 minutos
+
+            $attempts = RateLimiter::attempts($key);
+            $tooManyAttempts = RateLimiter::tooManyAttempts($key, 5);
+
+            // Registrar tentativa falha
+            Log::info([
+                'id_user' => null,
+                'rota' => 'api/login',
+                'detalhe' => json_encode([
+                    'email' => $request->email,
+                    'status' => 'failed',
+                    'method' => 'POST',
+                    'attempts' => $attempts,
+                ], JSON_UNESCAPED_UNICODE),
+                'ip' => $ip,
+            ]);
+
+            // Verificar se excedeu limite
+            return response()->json([
+                'message' => $tooManyAttempts
+                    ? 'Limite de tentativas excedido. Complete o CAPTCHA para continuar.'
+                    : 'As credenciais estão incorretas.',
+                'attempts_remaining' => max(0, 5 - $attempts),
+                'show_captcha' => $tooManyAttempts || $attempts >= 5,
+            ], 401);
+        }
+
+        // Resetar tentativas após login bem-sucedido
+        RateLimiter::clear($key);
+
+        $user = JWTAuth::user();
+
+        return response()->json([
+            'token' => $token,
+            'user_id' => $user->id,
+        ], 200);
+    }
+
+    protected function isRateLimited(Request $request)
+    {
+        $key = 'login-attempts:' . $request->ip();
+        $tooManyAttempts = RateLimiter::tooManyAttempts($key, 5);
+        
+        // Debug: Logar resultado de isRateLimited
+        Log::info('Verificação de RateLimiter', [
+            'ip' => $request->ip(),
+            'key' => $key,
+            'attempts' => RateLimiter::attempts($key),
+            'too_many_attempts' => $tooManyAttempts,
+        ]);
+
+        return $tooManyAttempts;
+    }
+
+    public function verifyCaptcha(Request $request)
+    {
+        $request->validate([
+            'g-recaptcha-response' => 'required',
+        ]);
+
+        try {
+            $recaptcha = new ReCaptcha(env('RECAPTCHA_SECRET_KEY'));
+            $response = $recaptcha->verify($request->input('g-recaptcha-response'), $request->ip());
+
+            if ($response->isSuccess()) {
+                // Resetar tentativas após captcha válido
+                RateLimiter::clear('login-attempts:' . $request->ip());
+                return response()->json(['message' => 'CAPTCHA verificado com sucesso'], 200);
+            }
+
+            return response()->json(['error' => 'Falha na verificação do CAPTCHA'], 422);
+        } catch (\Exception $e) {
+            Log::info('Erro ao verificar CAPTCHA: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['error' => 'Erro ao verificar CAPTCHA'], 500);
+        }
+    }
+
+    public function checkLoginRequirements(Request $request)
+    {
+        $ip = $request->ip();
+        $key = 'login-attempts:' . $ip;
+
+        return response()->json([
+            'show_captcha' => RateLimiter::tooManyAttempts($key, 5),
+            'attempts_remaining' => max(0, 5 - RateLimiter::attempts($key)),
+        ]);
     }
 
     public function logout(Request $request)
     {
         $user = JWTAuth::user();
-        Log::channel('activity')->info('Atividade registrada', [
+        LogModel::channel('activity')->info('Atividade registrada', [
             'user_id' => $user->id,
             'action' => 'logout',
             'details' => 'Usuário deslogado: ' . $user->email,

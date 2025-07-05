@@ -17,4 +17,8 @@ class Log extends Model
         'detalhe',
         'ip',
     ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+    ];
 }
