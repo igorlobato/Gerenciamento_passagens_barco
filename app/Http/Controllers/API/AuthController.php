@@ -4,8 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivationToken;
+use App\Models\TwoFactorCode;
 use App\Notifications\ActivateAccountNotification;
 use App\Notifications\ResetPasswordNotification;
+use App\Notifications\TwoFactorCodeNotification;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -89,12 +91,12 @@ class AuthController extends Controller
         $key = 'login-attempts:' . $ip;
 
         // Debug: Logar número de tentativas
-        Log::info('Tentativa de login', [
-            'ip' => $ip,
-            'email' => $request->email,
-            'attempts' => RateLimiter::attempts($key),
-            'too_many_attempts' => RateLimiter::tooManyAttempts($key, 5),
-        ]);
+        // Log::info('Tentativa de login', [
+        //     'ip' => $ip,
+        //     'email' => $request->email,
+        //     'attempts' => RateLimiter::attempts($key),
+        //     'too_many_attempts' => RateLimiter::tooManyAttempts($key, 5),
+        // ]);
 
         // Verificar se excedeu limite de tentativas
         if ($this->isRateLimited($request)) {
@@ -150,8 +152,22 @@ class AuthController extends Controller
 
         $user = JWTAuth::user();
 
+         // Gerar código para 2fa
+        $code = rand(100000, 999999);
+
+        TwoFactorCode::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'code' => $code,
+                'expires_at' => now()->addMinutes(10),
+            ]
+        );
+
+        $user->notify(new TwoFactorCodeNotification($code));
+
         return response()->json([
             'token' => $token,
+            'message' => 'Código de verificação enviado.',
             'user_id' => $user->id,
         ], 200);
     }
@@ -207,6 +223,44 @@ class AuthController extends Controller
             'attempts_remaining' => max(0, 5 - RateLimiter::attempts($key)),
         ]);
     }
+
+    public function verify2fa(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'code' => 'required|string',
+        ]);
+
+        $record = TwoFactorCode::where('user_id', $request->user_id)
+            ->where('code', $request->code)
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$record) {
+            Log::warning('Tentativa de 2FA inválida', [
+                'user_id' => $request->user_id,
+                'code' => $request->code,
+                'ip' => $request->ip(),
+            ]);
+            return response()->json(['error' => 'Código inválido ou expirado.'], 422);
+        }
+
+        // Código correto: deletar registro
+        $record->delete();
+
+        // Autenticar o usuário: agora sim gerar token
+        $user = User::find($request->user_id);
+
+       // Autenticar o usuário: gerar token JWT
+        $user = User::find($request->user_id);
+        $token = JWTAuth::fromUser($user);
+
+        return response()->json([
+            'message' => 'Autenticação em 2 fatores bem-sucedida.',
+            'token' => $token,
+        ]);
+    }
+
 
     public function logout(Request $request)
     {

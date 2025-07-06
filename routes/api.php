@@ -27,6 +27,7 @@ Route::post('/reset-password', [AuthController::class, 'resendPassword']);
 Route::post('/reset-password/confirm', [AuthController::class, 'resetPassword']);
 Route::post('/verify-captcha', [AuthController::class, 'verifyCaptcha']);
 Route::get('/check-login-requirements', [AuthController::class, 'checkLoginRequirements']);
+Route::post('/verify-2fa', [AuthController::class, 'verify2fa']);
 
 //Rotas protregidas por token JWT em auth.php
 Route::middleware('auth:api', 'log.activity')->group(function () {
