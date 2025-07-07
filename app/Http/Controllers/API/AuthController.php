@@ -166,7 +166,7 @@ class AuthController extends Controller
         $user->notify(new TwoFactorCodeNotification($code));
 
         return response()->json([
-            'token' => $token,
+            // 'token' => $token,
             'message' => 'Código de verificação enviado.',
             'user_id' => $user->id,
         ], 200);
@@ -260,7 +260,6 @@ class AuthController extends Controller
             'token' => $token,
         ]);
     }
-
 
     public function logout(Request $request)
     {

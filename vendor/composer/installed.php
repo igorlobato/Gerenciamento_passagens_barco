@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '1a424f1b37f32021b13d047b9a7bcddbe56fc778',
+        'reference' => '4eb43a62452ba2df80c5d0109407909d7147d270',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -391,7 +391,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '1a424f1b37f32021b13d047b9a7bcddbe56fc778',
+            'reference' => '4eb43a62452ba2df80c5d0109407909d7147d270',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -784,8 +784,8 @@
         'psr/log-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '3.0.0',
-                1 => '1.0|2.0|3.0',
+                0 => '1.0|2.0|3.0',
+                1 => '3.0.0',
             ),
         ),
         'psr/simple-cache' => array(
@@ -844,6 +844,15 @@
             'replaced' => array(
                 0 => '4.7.6',
             ),
+        ),
+        'ryoluo/sail-ssl' => array(
+            'pretty_version' => 'v1.4.0',
+            'version' => '1.4.0.0',
+            'reference' => '0db9b67df79e245d9c22aa3aced3b2564a3213b8',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../ryoluo/sail-ssl',
+            'aliases' => array(),
+            'dev_requirement' => true,
         ),
         'sebastian/cli-parser' => array(
             'pretty_version' => '2.0.1',

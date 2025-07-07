@@ -21,6 +21,7 @@
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^7.0",
         "phpunit/phpunit": "^10.1",
+        "ryoluo/sail-ssl": "^1.4",
         "spatie/laravel-ignition": "^2.0"
     },
     "autoload": {
