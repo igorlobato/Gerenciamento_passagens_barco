@@ -29,7 +29,7 @@ class LogActivity
                 $user = JWTAuth::user();
                 if ($user) {
                     LogModel::create([
-                        'id_user' => $user->id,
+                        'id_user' => $user->id ?? null,
                         'rota' => $request->method() . ' ' . $request->path(),
                         'detalhe' => json_encode($request->all(), JSON_UNESCAPED_UNICODE),
                         'ip' => $request->ip(),

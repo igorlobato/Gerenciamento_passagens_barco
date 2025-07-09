@@ -29,7 +29,7 @@ O Sistema de Gerenciamento de Passagens de Barco é um sistema web desenvolvido 
 - <b>Proteção de Dados Sensíveis:</b> Senhas são armazenadas usando hash (Bcrypt) no banco de dados.
 
 ## 3. Não Repúdio
-- <b>Registro de Atividades (Logging):</b> Todas as ações dos usuários (login, logout, tentativas de login mal-sucedidas, verificação 2FA, etc.) são registradas em logs detalhados, incluindo informações como IP, Id, rotas, garantindo rastreabilidade.
+- <b>Registro de Atividades (Logging):</b> Todas as ações dos usuários são registradas em logs detalhados, incluindo informações como IP, Id, rotas, garantindo rastreabilidade.
 - <b>Rate Limiting:</b> Limitação de tentativas de login por IP (máximo de 5 tentativas em 15 minutos) para prevenir ataques de força bruta.
 
 ## 4. Integridade
@@ -41,16 +41,6 @@ O Sistema de Gerenciamento de Passagens de Barco é um sistema web desenvolvido 
 - app/Http/Notifications/*.php: Notificações.
 - app/Http/Middleware/LogActivity.php: Middleware para registrar atividades dos usuários em logs.
 - routes/api.php: Define rotas da API, com proteção por middleware de autenticação e permissões.
-
-
-
-config/cors.php: Configuração de CORS para permitir apenas requisições do frontend 
-
-## A implementação das funcionalidades pode ser encontrada nos seguintes arquivos:
-- App/Http/Controllers/Api/AuthController.php | Funcionalidades relacionadas a autenticação do usuário (token, login, logout, envio de e-mail, redefinição de senha, token de e-mail com tempo limitado)
-- App/Http/Notifications/ActivateAccountNotification.php e ResetPasswordNotification | Criação dos e-mails e seus links 
-- Routes/api.php | Definicação das rotas da API e proteção por token
-- App/Middlewate/LogAcitivity | Criação do middlewate de log de atividades do sistema.
 
 ## Pré-requisitos
 - Para rodar a API localmente, você precisa de:

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('two_factor_codes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('code');
             $table->timestamp('expires_at');
             $table->timestamps();
