@@ -7,20 +7,44 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## Sistema de Gerenciamento de Passagem de Barcos
+# Sistema de Gerenciamento de Passagem de Barcos
 
-## Dev:
+## Descrição
+
+O Sistema de Gerenciamento de Passagens de Barco é um sistema web desenvolvido treinar a plicação dos cinco princípios de segurança da informação: Autenticidade, Confidencialidade, Não Repúdio, Disponibilidade e Integridade. Devido ao ambiente local de desenvolvimento, a disponibilidade não foi testada.
+
+## Desenvolvedor:
 - Igor Lobato de Oliveira
 
-## O trabalho tem como objetivo treinar a aplicação dos 5 princípios de segurança da informação: Autenticidade; Confidenciabilidade; Não repúdio; Disponibilidade, Integridade. Devido a limitações do sistema funcionar em ambiente local, não será possível testar a disponíbilidade.
-
 ## Funcionalidades de Segurança
-- Registro com Validação: Criação de contas com validação de e-mail e senha (mínimo 8 caracteres). Ativação de conta por e-mail.
-- Login com Token JWT: Autenticação com e-mail e senha, retornando um token JWT para acesso protegido.
-- Logout Seguro: Invalidação do token JWT ao deslogar.
-- Validação de Entrada: Proteção contra injeções e dados inválidos usando regras do Laravel.
-- Proteção de Rotas: Endpoints protegidos com middleware de autenticação verificando o token.
-- Registro de atividade: A atividade dos usuários são registradas em um log exclusivo.
+## 1. Autenticidade
+ - <b>Registro com Validação:</b> Criação de contas com validação de e-mail (formato válido) e senha (mínimo de 8 caracteres, letras maíscula e caracter especial). Após o registro, o usuário recebe um e-mail com um link de ativação para validar a conta, diferenciando contas ativas de cadastros inativos.
+ - <b>Login com Token JWT:</b> Autenticação baseada em e-mail e senha, gerando um token JWT (JSON Web Token) após validação bem-sucedida. O token é usado para autenticar requisições em rotas protegidas.
+- <b>Autenticação em Dois Fatores (2FA):</b> Após o login, o usuário recebe um código de verificação por e-mail, válido por 10 minutos, para confirmar a identidade, reforçando a autenticidade.
+
+## 2. Confidencialidade
+ - <b>HTTPS em Todo o Ambiente:</b>  Tanto o backend (Laravel com Sail) quanto o frontend (React com Vite) rodam em HTTPS, garantindo que todas as comunicações entre cliente e servidor sejam criptografadas.
+    <b>Backend:</b> Configurado com ryoluo/sail-ssl, que usa certificados autossinados para HTTPS na porta 443 (https://localhost).
+    <b>Frontend:</b> Configurado com certificados confiáveis gerados pelo mkcert, servidos na porta 3000 (https://localhost:3000).
+- <b>Proteção de Dados Sensíveis:</b> Senhas são armazenadas usando hash (Bcrypt) no banco de dados.
+
+## 3. Não Repúdio
+- <b>Registro de Atividades (Logging):</b> Todas as ações dos usuários (login, logout, tentativas de login mal-sucedidas, verificação 2FA, etc.) são registradas em logs detalhados, incluindo informações como IP, Id, rotas, garantindo rastreabilidade.
+- <b>Rate Limiting:</b> Limitação de tentativas de login por IP (máximo de 5 tentativas em 15 minutos) para prevenir ataques de força bruta.
+
+## 4. Integridade
+- <b>Tokens Temporários:</b> Links de ativação de conta e redefinição de senha, bem como códigos 2FA, têm validade limitada, garantindo que tokens não sejam reutilizados.
+- <b>Proteção de Rotas:</b> Endpoints da API são protegidos por middleware de autenticação (auth:api), garantindo que apenas usuários autenticados com tokens válidos acessem recursos sensíveis.
+
+## Arquivos importantes:
+- app/Http/Controllers/Api/*.php: Controllers responsáveis por implementar a lógica.
+- app/Http/Notifications/*.php: Notificações.
+- app/Http/Middleware/LogActivity.php: Middleware para registrar atividades dos usuários em logs.
+- routes/api.php: Define rotas da API, com proteção por middleware de autenticação e permissões.
+
+
+
+config/cors.php: Configuração de CORS para permitir apenas requisições do frontend 
 
 ## A implementação das funcionalidades pode ser encontrada nos seguintes arquivos:
 - App/Http/Controllers/Api/AuthController.php | Funcionalidades relacionadas a autenticação do usuário (token, login, logout, envio de e-mail, redefinição de senha, token de e-mail com tempo limitado)

@@ -36,7 +36,7 @@ class ActivateAccountNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $url = url('/api/activate?token=' . $this->token);
+        $url = url('https://localhost/api/activate?token=' . $this->token);
 
         return (new MailMessage)
                     ->subject('Ative sua conta')
